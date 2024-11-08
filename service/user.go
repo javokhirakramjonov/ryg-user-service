@@ -34,7 +34,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		FullName: req.FullName,
 		Password: hashedPassword,
 		Email:    req.Email,
-		Role:     req.Role.String(),
+		Role:     "user",
 	}
 
 	if err := s.db.WithContext(ctx).Create(&user).Error; err != nil {
@@ -45,7 +45,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		Id:       user.ID,
 		FullName: user.FullName,
 		Email:    user.Email,
-		Role:     pb.Role(pb.Role_value[user.Role]),
+		Role:     user.Role,
 		IsActive: user.IsActive,
 	}
 
@@ -73,7 +73,7 @@ func (s *UserService) GetUserById(ctx context.Context, req *pb.GetUserRequest) (
 		Id:       user.ID,
 		FullName: user.FullName,
 		Email:    user.Email,
-		Role:     pb.Role(pb.Role_value[user.Role]),
+		Role:     user.Role,
 		IsActive: user.IsActive,
 	}, nil
 }
@@ -97,7 +97,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 		Id:       user.ID,
 		FullName: user.FullName,
 		Email:    user.Email,
-		Role:     pb.Role(pb.Role_value[user.Role]),
+		Role:     user.Role,
 		IsActive: user.IsActive,
 	}, nil
 }
