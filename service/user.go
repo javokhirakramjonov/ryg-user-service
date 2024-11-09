@@ -14,13 +14,13 @@ import (
 )
 
 type UserService struct {
-	db *gorm.DB
+	DB *gorm.DB
 	pb.UnimplementedUserServiceServer
 }
 
 func NewUserService() *UserService {
 	return &UserService{
-		db: db.DB,
+		DB: db.DB,
 	}
 }
 
@@ -37,7 +37,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		Role:     "user",
 	}
 
-	if err := s.db.WithContext(ctx).Create(&user).Error; err != nil {
+	if err := s.DB.WithContext(ctx).Create(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -62,7 +62,7 @@ func hashPassword(password string) (string, error) {
 
 func (s *UserService) GetUserById(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
 	var user model.User
-	if err := s.db.WithContext(ctx).First(&user, req.Id).Error; err != nil {
+	if err := s.DB.WithContext(ctx).First(&user, req.Id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "user not found")
 		}
@@ -80,7 +80,7 @@ func (s *UserService) GetUserById(ctx context.Context, req *pb.GetUserRequest) (
 
 func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
 	var user model.User
-	if err := s.db.WithContext(ctx).First(&user, req.Id).Error; err != nil {
+	if err := s.DB.WithContext(ctx).First(&user, req.Id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "user not found")
 		}
@@ -89,7 +89,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 
 	user.FullName = req.FullName
 
-	if err := s.db.WithContext(ctx).Save(&user).Error; err != nil {
+	if err := s.DB.WithContext(ctx).Save(&user).Error; err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update user: %v", err)
 	}
 
@@ -103,7 +103,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 }
 
 func (s *UserService) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*emptypb.Empty, error) {
-	if err := s.db.WithContext(ctx).Delete(&model.User{}, req.Id).Error; err != nil {
+	if err := s.DB.WithContext(ctx).Delete(&model.User{}, req.Id).Error; err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to delete user: %v", err)
 	}
 	return &emptypb.Empty{}, nil

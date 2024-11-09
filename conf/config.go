@@ -17,8 +17,8 @@ type DBConfig struct {
 }
 
 type Config struct {
-	DB       DBConfig
-	GRPCPort string
+	DB      DBConfig
+	GRPCUrl string
 }
 
 func LoadConfig() *Config {
@@ -37,6 +37,6 @@ func LoadConfig() *Config {
 			SSLMode:    os.Getenv("DB_SSL_MODE"),
 			TimeZone:   os.Getenv("DB_TIMEZONE"),
 		},
-		GRPCPort: os.Getenv("GRPC_PORT"),
+		GRPCUrl: os.Getenv("GRPC_URL"),
 	}
 }
