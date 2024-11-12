@@ -49,7 +49,7 @@ func ConnectDB(cnf conf.DBConfig) {
 func CloseDB() {
 	sqlDB, err := DB.DB()
 	if err != nil {
-		log.Fatalf("Error getting SQL DB: %v", err)
+		log.Fatalf("Error getting SQL db: %v", err)
 	}
 	if err := sqlDB.Close(); err != nil {
 		log.Fatalf("Error closing the database: %v", err)

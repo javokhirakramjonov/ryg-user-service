@@ -85,7 +85,7 @@ var user = model.User{
 
 func TestCreateUser(t *testing.T) {
 	defer clearDatabase()
-	userService := &UserService{DB: testDb}
+	userService := NewUserService(testDb)
 
 	req := &pb.CreateUserRequest{
 		FullName: "Test User",
@@ -110,7 +110,7 @@ func clearDatabase() {
 
 func TestGetUserById(t *testing.T) {
 	defer clearDatabase()
-	userService := &UserService{DB: testDb}
+	userService := &UserService{db: testDb}
 
 	// First create a user for testing
 	testDb.Create(&user)
@@ -125,7 +125,7 @@ func TestGetUserById(t *testing.T) {
 }
 
 func TestUpdateUser(t *testing.T) {
-	userService := &UserService{DB: testDb}
+	userService := &UserService{db: testDb}
 
 	// First create a user for testing
 	testDb.Create(&user)
@@ -142,7 +142,7 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	userService := &UserService{DB: testDb}
+	userService := &UserService{db: testDb}
 
 	// First create a user for testing
 	testDb.Create(&user)
