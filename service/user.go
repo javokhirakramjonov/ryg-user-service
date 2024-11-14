@@ -77,6 +77,24 @@ func (s *UserService) GetUserById(ctx context.Context, req *pb.GetUserRequest) (
 	}, nil
 }
 
+func (s *UserService) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailRequest) (*pb.User, error) {
+	var user model.User
+	if err := s.db.WithContext(ctx).Where("email = ?", req.Email).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "user not found")
+		}
+		return nil, status.Errorf(codes.Internal, "failed to retrieve user: %v", err)
+	}
+
+	return &pb.User{
+		Id:       user.ID,
+		FullName: user.FullName,
+		Email:    user.Email,
+		Role:     user.Role,
+		IsActive: user.IsActive,
+	}, nil
+}
+
 func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
 	var user model.User
 	if err := s.db.WithContext(ctx).First(&user, req.Id).Error; err != nil {
