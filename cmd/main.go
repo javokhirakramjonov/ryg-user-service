@@ -24,7 +24,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	s := service.NewUserService()
+	s := service.NewUserService(db.DB)
 	user_service.RegisterUserServiceServer(grpcServer, s)
 
 	fmt.Printf("User Microservice is running on port %v...", cnf.GRPCUrl)
