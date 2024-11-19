@@ -8,22 +8,27 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
-	pb "ryg-user-service/gen_proto/user_service"
+	"log"
+	pbe "ryg-user-service/gen_proto/email_service"
+	pbu "ryg-user-service/gen_proto/user_service"
 	"ryg-user-service/model"
+	"ryg-user-service/rabbit_mq"
 )
 
 type UserService struct {
-	db *gorm.DB
-	pb.UnimplementedUserServiceServer
+	db                    *gorm.DB
+	genericEmailPublisher *rabbit_mq.GenericEmailPublisher
+	pbu.UnimplementedUserServiceServer
 }
 
-func NewUserService(db *gorm.DB) *UserService {
+func NewUserService(db *gorm.DB, genericEmailPublisher *rabbit_mq.GenericEmailPublisher) *UserService {
 	return &UserService{
-		db: db,
+		db:                    db,
+		genericEmailPublisher: genericEmailPublisher,
 	}
 }
 
-func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+func (s *UserService) CreateUser(ctx context.Context, req *pbu.CreateUserRequest) (*pbu.User, error) {
 	hashedPassword, err := hashPassword(req.Password)
 	if err != nil {
 		return nil, err
@@ -40,12 +45,22 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		return nil, err
 	}
 
-	resp := &pb.User{
+	resp := &pbu.User{
 		Id:       user.ID,
 		FullName: user.FullName,
 		Email:    user.Email,
 		Role:     user.Role,
 		IsActive: user.IsActive,
+	}
+
+	err = s.genericEmailPublisher.Publish(&pbe.GenericEmail{
+		To:      user.Email,
+		Subject: "Welcome to RYG",
+		Body:    "Welcome to RYG, we are glad to have you on board!",
+	})
+
+	if err != nil {
+		log.Printf("Failed to publish email: %v", err)
 	}
 
 	return resp, nil
@@ -59,7 +74,7 @@ func hashPassword(password string) (string, error) {
 	return string(hashedBytes), nil
 }
 
-func (s *UserService) GetUserById(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
+func (s *UserService) GetUserById(ctx context.Context, req *pbu.GetUserRequest) (*pbu.User, error) {
 	var user model.User
 	if err := s.db.WithContext(ctx).First(&user, req.Id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -68,7 +83,7 @@ func (s *UserService) GetUserById(ctx context.Context, req *pb.GetUserRequest) (
 		return nil, status.Errorf(codes.Internal, "failed to retrieve user: %v", err)
 	}
 
-	return &pb.User{
+	return &pbu.User{
 		Id:       user.ID,
 		FullName: user.FullName,
 		Email:    user.Email,
@@ -77,7 +92,7 @@ func (s *UserService) GetUserById(ctx context.Context, req *pb.GetUserRequest) (
 	}, nil
 }
 
-func (s *UserService) GetUserForLogin(ctx context.Context, req *pb.GetUserForLoginRequest) (*pb.UserForLogin, error) {
+func (s *UserService) GetUserForLogin(ctx context.Context, req *pbu.GetUserForLoginRequest) (*pbu.UserForLogin, error) {
 	var user model.User
 	if err := s.db.WithContext(ctx).Where("email = ?", req.Email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -86,7 +101,7 @@ func (s *UserService) GetUserForLogin(ctx context.Context, req *pb.GetUserForLog
 		return nil, status.Errorf(codes.Internal, "failed to retrieve user: %v", err)
 	}
 
-	return &pb.UserForLogin{
+	return &pbu.UserForLogin{
 		Id:       user.ID,
 		Email:    user.Email,
 		Password: user.Password,
@@ -94,7 +109,7 @@ func (s *UserService) GetUserForLogin(ctx context.Context, req *pb.GetUserForLog
 	}, nil
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
+func (s *UserService) UpdateUser(ctx context.Context, req *pbu.UpdateUserRequest) (*pbu.User, error) {
 	var user model.User
 	if err := s.db.WithContext(ctx).First(&user, req.Id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -109,7 +124,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 		return nil, status.Errorf(codes.Internal, "failed to update user: %v", err)
 	}
 
-	return &pb.User{
+	return &pbu.User{
 		Id:       user.ID,
 		FullName: user.FullName,
 		Email:    user.Email,
@@ -118,7 +133,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 	}, nil
 }
 
-func (s *UserService) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*emptypb.Empty, error) {
+func (s *UserService) DeleteUser(ctx context.Context, req *pbu.DeleteUserRequest) (*emptypb.Empty, error) {
 	if err := s.db.WithContext(ctx).Delete(&model.User{}, req.Id).Error; err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to delete user: %v", err)
 	}
