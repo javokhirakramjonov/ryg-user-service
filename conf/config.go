@@ -16,9 +16,17 @@ type DBConfig struct {
 	TimeZone   string
 }
 
+type RabbitMQConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+}
+
 type Config struct {
-	DB      DBConfig
-	GRPCUrl string
+	DB             DBConfig
+	RabbitMQConfig RabbitMQConfig
+	GRPCUrl        string
 }
 
 func LoadConfig() *Config {
@@ -38,5 +46,11 @@ func LoadConfig() *Config {
 			TimeZone:   os.Getenv("DB_TIMEZONE"),
 		},
 		GRPCUrl: os.Getenv("GRPC_URL"),
+		RabbitMQConfig: RabbitMQConfig{
+			Host:     os.Getenv("RABBITMQ_HOST"),
+			Port:     os.Getenv("RABBITMQ_PORT"),
+			User:     os.Getenv("RABBITMQ_USER"),
+			Password: os.Getenv("RABBITMQ_PASSWORD"),
+		},
 	}
 }

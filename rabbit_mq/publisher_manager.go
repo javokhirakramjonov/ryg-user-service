@@ -3,6 +3,7 @@ package rabbit_mq
 import (
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
+	"ryg-user-service/conf"
 )
 
 const exchangeName = "email_service_topics"
@@ -13,8 +14,9 @@ type PublisherManager struct {
 	GenericEmailQueuePublisher *GenericEmailPublisher
 }
 
-func NewPublisherManager() PublisherManager {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+func NewPublisherManager(cnf conf.RabbitMQConfig) PublisherManager {
+	url := "amqp://" + cnf.User + ":" + cnf.Password + "@" + cnf.Host + ":" + cnf.Port + "/"
+	conn, err := amqp.Dial(url)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	log.Printf("Connected to RabbitMQ")
 

@@ -18,7 +18,7 @@ func main() {
 	db.ConnectDB(cnf.DB)
 	defer db.CloseDB()
 
-	pm := rabbit_mq.NewPublisherManager()
+	pm := rabbit_mq.NewPublisherManager(cnf.RabbitMQConfig)
 	defer pm.Close()
 
 	lis, err := net.Listen("tcp", cnf.GRPCUrl)
