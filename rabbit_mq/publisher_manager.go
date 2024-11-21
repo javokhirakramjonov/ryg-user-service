@@ -24,6 +24,17 @@ func NewPublisherManager(cnf conf.RabbitMQConfig) PublisherManager {
 	failOnError(err, "Failed to open a channel")
 	log.Printf("Opened a channel")
 
+	err = ch.ExchangeDeclare(
+		exchangeName, // exchange name
+		"topic",      // exchange type
+		true,         // durable
+		false,        // auto-deleted
+		false,        // internal
+		false,        // no-wait
+		nil,          // arguments
+	)
+	failOnError(err, "Failed to declare an exchange")
+
 	genericEmailPublisher := NewGenericEmailQueuePublisher(ch, exchangeName)
 
 	return PublisherManager{

@@ -33,19 +33,6 @@ func (c *GenericEmailPublisher) Publish(data *email_service.GenericEmail) error 
 		return err
 	}
 
-	err = c.Ch.ExchangeDeclare(
-		c.exchangeName, // exchange name
-		"topic",        // exchange type
-		true,           // durable
-		false,          // auto-deleted
-		false,          // internal
-		false,          // no-wait
-		nil,            // arguments
-	)
-	if err != nil {
-		return err
-	}
-
 	err = c.Ch.Publish(
 		c.exchangeName,         // exchange name
 		genericEmailRoutingKey, // routing key (dynamic for topic exchange)
