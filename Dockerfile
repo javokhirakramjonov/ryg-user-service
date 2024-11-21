@@ -10,6 +10,9 @@ COPY go.mod go.sum ./
 # Download dependencies
 RUN go mod download
 
+# Generate protos
+RUN make gen-proto
+
 # Copy the entire source code
 COPY . .
 
