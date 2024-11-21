@@ -5,7 +5,6 @@ FROM golang:1.23.2
 WORKDIR /app
 
 # Copy go.mod and go.sum files first to leverage caching
-RUN go mod tidy
 COPY go.mod go.sum ./
 
 # Download dependencies
