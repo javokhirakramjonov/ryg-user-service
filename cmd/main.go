@@ -21,7 +21,7 @@ func main() {
 	pm := rabbit_mq.NewPublisherManager(cnf.RabbitMQConfig)
 	defer pm.Close()
 
-	lis, err := net.Listen("tcp", cnf.GRPCUrl)
+	lis, err := net.Listen("tcp", cnf.RYGUserServiceUrl)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
@@ -31,7 +31,7 @@ func main() {
 	s := service.NewUserService(db.DB, pm.GenericEmailQueuePublisher)
 	user_service.RegisterUserServiceServer(grpcServer, s)
 
-	fmt.Printf("User Microservice is running on port %v...", cnf.GRPCUrl)
+	fmt.Printf("User Microservice is running on port %v...", cnf.RYGUserServiceUrl)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}

@@ -22,23 +22,23 @@ type RabbitMQConfig struct {
 }
 
 type Config struct {
-	DB             DBConfig
-	RabbitMQConfig RabbitMQConfig
-	GRPCUrl        string
+	DB                DBConfig
+	RabbitMQConfig    RabbitMQConfig
+	RYGUserServiceUrl string
 }
 
 func LoadConfig() *Config {
 	return &Config{
 		DB: DBConfig{
-			DBHost:     os.Getenv("DB_HOST"),
-			DBPort:     os.Getenv("DB_PORT"),
-			DBUser:     os.Getenv("DB_USER"),
-			DBPassword: os.Getenv("DB_PASSWORD"),
-			DBName:     os.Getenv("DB_NAME"),
-			SSLMode:    os.Getenv("DB_SSL_MODE"),
-			TimeZone:   os.Getenv("DB_TIMEZONE"),
+			DBHost:     os.Getenv("POSTGRES_DB_HOST"),
+			DBPort:     os.Getenv("POSTGRES_DB_PORT"),
+			DBUser:     os.Getenv("POSTGRES_DB_USER"),
+			DBPassword: os.Getenv("POSTGRES_DB_PASSWORD"),
+			DBName:     os.Getenv("POSTGRES_DB_NAME"),
+			SSLMode:    os.Getenv("POSTGRES_DB_SSL_MODE"),
+			TimeZone:   os.Getenv("POSTGRES_DB_TIMEZONE"),
 		},
-		GRPCUrl: os.Getenv("GRPC_URL"),
+		RYGUserServiceUrl: os.Getenv("RYG_USER_SERVICE_URL"),
 		RabbitMQConfig: RabbitMQConfig{
 			Host:     os.Getenv("RABBITMQ_HOST"),
 			Port:     os.Getenv("RABBITMQ_PORT"),
